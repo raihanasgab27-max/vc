@@ -1,0 +1,5 @@
+flask
+flask-cors
+rvc-python
+sounddevice
+numpy

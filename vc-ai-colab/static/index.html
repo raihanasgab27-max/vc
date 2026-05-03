@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceAI — AI Voice Changer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>VoiceAI <span style="font-size: 0.5em; background: #fca5a5; color: #7f1d1d; padding: 2px 6px; border-radius: 4px; vertical-align: middle;">Colab Version</span></h1>
+            <p class="subtitle">AI Voice Changer — Edisi Google Colab</p>
+        </header>
+
+        <!-- Server Settings -->
+        <section class="server-settings">
+            <div class="server-settings-header">
+                <span class="label" style="margin:0;">Server API</span>
+                <div id="serverStatus" class="server-status status-local">
+                    <span class="status-dot"></span>
+                    <span id="statusLabel">Local</span>
+                </div>
+            </div>
+            <div class="model-row">
+                <input type="text" id="apiUrlInput" placeholder="http://localhost:5000" class="input">
+                <button class="btn btn-sm" id="btnSaveApi" title="Save & Test Connection">✓</button>
+            </div>
+            <p class="hint mt-2" style="font-size:0.65rem; color:var(--text3);">Kosongkan untuk menggunakan server lokal. Masukkan URL Cloudflare untuk Colab.</p>
+        </section>
+
+        <!-- Model Selection -->
+        <section class="section">
+            <label class="label">Voice Model</label>
+            <div class="model-row">
+                <select id="modelSelect">
+                    <option value="">-- Pilih Model --</option>
+                </select>
+                <button class="btn btn-sm" id="btnRefresh" title="Refresh models">↻</button>
+                <button class="btn btn-sm" id="btnUploadModel" title="Upload model">+ Model</button>
+            </div>
+            <input type="file" id="modelFileInput" accept=".pth,.index" hidden>
+            <div class="model-upload hidden" id="modelUploadArea">
+                <input type="text" id="modelNameInput" placeholder="Nama model" class="input">
+                <div class="drop-zone" id="modelDropZone">
+                    <p>Drop file .pth di sini atau <span class="link">pilih file</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Audio Input -->
+        <section class="section">
+            <label class="label">Audio Input</label>
+            <div class="tabs">
+                <button class="tab active" data-tab="upload" id="tabUpload">Upload File</button>
+                <button class="tab" data-tab="record" id="tabRecord">Rekam</button>
+                <button class="tab" data-tab="realtime" id="tabRealtime" style="display: none;">Real-Time</button>
+            </div>
+
+            <!-- Upload Tab -->
+            <div class="tab-content active" id="panelUpload">
+                <div class="drop-zone" id="audioDropZone">
+                    <p>Drop file audio atau <span class="link">pilih file</span></p>
+                    <span class="hint">MP3, WAV, OGG, M4A</span>
+                </div>
+                <input type="file" id="audioFileInput" accept="audio/*" hidden>
+                <div class="file-badge hidden" id="fileBadge">
+                    <span id="fileLabel"></span>
+                    <button class="btn-x" id="btnRemoveFile">✕</button>
+                </div>
+            </div>
+
+            <!-- Record Tab -->
+            <div class="tab-content" id="panelRecord">
+                <div class="record-area">
+                    <button class="btn-record" id="btnMic">
+                        <span class="rec-dot"></span>
+                        <span id="recLabel">Mulai Rekam</span>
+                    </button>
+                    <span class="rec-time hidden" id="recTime">00:00</span>
+                </div>
+            </div>
+
+            <!-- Real-Time Tab -->
+            <div class="tab-content" id="panelRealtime">
+                <div class="realtime-area">
+                    <div class="param">
+                        <div class="param-head">
+                            <label class="label-sm" style="margin:0;">Input Device (Microphone)</label>
+                            <button class="btn-x" id="btnRefreshDevices" title="Refresh devices" style="font-size:1rem;">↻</button>
+                        </div>
+                        <select id="inputDevice">
+                            <option value="">-- Memuat Device --</option>
+                        </select>
+                        <div class="vu-meter">
+                            <div class="vu-bar" id="vuBar"></div>
+                        </div>
+                    </div>
+                    <div class="param mt-3">
+                        <label class="label-sm">Output Device (Virtual Cable)</label>
+                        <select id="outputDevice">
+                            <option value="">-- Memuat Device --</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-full mt-3" id="btnRealtimeStart">Mulai Real-Time Stream</button>
+                    <button class="btn btn-outline btn-full hidden mt-3" id="btnRealtimeStop">Berhenti Stream</button>
+                    <p class="hint mt-2 text-center" style="margin-top:10px;">Gunakan "CABLE Input" sebagai Output, dan pilih "CABLE Output" sebagai Microphone di Discord/WhatsApp.</p>
+                </div>
+            </div>
+
+            <!-- Audio Preview -->
+            <div class="audio-preview hidden" id="audioPreview">
+                <label class="label-sm">Input Audio</label>
+                <audio controls id="audioPlayer"></audio>
+            </div>
+        </section>
+
+        <!-- Parameters -->
+        <section class="section">
+            <label class="label">Parameter</label>
+            <div class="params-grid">
+                <div class="param">
+                    <div class="param-head">
+                        <span>Pitch (semitone)</span>
+                        <span id="pitchVal">0</span>
+                    </div>
+                    <input type="range" id="pitchSlider" min="-12" max="12" value="0" step="1">
+                </div>
+                <div class="param">
+                    <div class="param-head">
+                        <span>Method</span>
+                    </div>
+                    <select id="f0method">
+                        <option value="rmvpe" selected>rmvpe (recommended)</option>
+                        <option value="harvest">harvest</option>
+                        <option value="pm">pm (fast)</option>
+                        <option value="crepe">crepe</option>
+                    </select>
+                </div>
+                <div class="param">
+                    <div class="param-head">
+                        <span>Output Format</span>
+                    </div>
+                    <select id="outputFormat">
+                        <option value="mp3" selected>MP3 (WhatsApp compatible)</option>
+                        <option value="wav">WAV (Lossless)</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Convert Button -->
+        <button class="btn btn-primary btn-full" id="btnConvert" disabled>
+            <span id="convertLabel">Konversi Suara</span>
+        </button>
+
+        <!-- Result -->
+        <section class="section hidden" id="resultSection">
+            <label class="label">Hasil</label>
+            <audio controls id="resultPlayer" class="w-full"></audio>
+            <a class="btn btn-full btn-outline" id="btnDownload" download>Download Hasil</a>
+        </section>
+
+        <!-- Status -->
+        <div class="status hidden" id="statusBar">
+            <div class="spinner"></div>
+            <span id="statusText">Memproses...</span>
+        </div>
+
+        <footer>
+            <p>Taruh file model (.pth) di folder <code>rvc_models/nama_model/</code></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
