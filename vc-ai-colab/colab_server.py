@@ -10,8 +10,10 @@ PORT = 5000  # Note: vc-ai-colab/app.py usually runs on 5000
 
 def install_dependencies():
     print("[1/3] Memasang dependensi...")
-    # Fix for newer python in colab and missing packages
-    subprocess.run(["pip", "install", "flask", "flask-cors", "rvc-python", "numpy==1.26.4", "fairseq"], check=True)
+    # Fix for dependency conflicts in Colab
+    subprocess.run(["pip", "install", "flask", "flask-cors", "fairseq"], check=True)
+    subprocess.run(["pip", "install", "faiss-cpu==1.7.3"], check=True)
+    subprocess.run(["pip", "install", "rvc-python"], check=True)
     
 def setup_cloudflared():
     print("[2/3] Menyiapkan Cloudflare Tunnel...")
