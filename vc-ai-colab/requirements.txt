@@ -1,5 +1,4 @@
 flask
 flask-cors
-rvc-python
-sounddevice
-numpy
+infer_rvc_python
+numpy==1.26.4

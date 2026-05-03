@@ -10,18 +10,8 @@ PORT = 5000  # Note: vc-ai-colab/app.py usually runs on 5000
 
 def install_dependencies():
     print("[1/3] Memasang dependensi...")
-    # Fix for dependency conflicts in Colab (Python 3.12)
-    # Install base dependencies first
-    subprocess.run(["pip", "install", "flask", "flask-cors", "faiss-cpu", "loguru", "av", "ffmpeg-python", "numpy==1.26.4"], check=True)
-    
-    # Install rvc-python without its broken dependencies
-    print("Memasang rvc-python (bypass mode)...")
-    subprocess.run(["pip", "install", "rvc-python", "--no-deps"], check=True)
-    
-    # Install fairseq dependencies manually to avoid metadata errors
-    print("Memasang fairseq dependencies...")
-    subprocess.run(["pip", "install", "omegaconf==2.0.6", "hydra-core==1.0.7"], check=True)
-    subprocess.run(["pip", "install", "fairseq"], check=True)
+    # Using infer_rvc_python which is stable on Python 3.12 Colab
+    subprocess.run(["pip", "install", "flask", "flask-cors", "infer_rvc_python", "numpy==1.26.4"], check=True)
     
 def setup_cloudflared():
     print("[2/3] Menyiapkan Cloudflare Tunnel...")
