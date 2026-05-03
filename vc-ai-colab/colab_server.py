@@ -10,8 +10,13 @@ PORT = 5000  # Note: vc-ai-colab/app.py usually runs on 5000
 
 def install_dependencies():
     print("[1/3] Memasang dependensi...")
-    # Using infer_rvc_python which is stable on Python 3.12 Colab
-    subprocess.run(["pip", "install", "flask", "flask-cors", "infer_rvc_python", "numpy==1.26.4"], check=True)
+    # Fix for dependency conflicts in Colab (Python 3.12)
+    # Install dependencies manually to bypass faiss-cpu==1.7.3 requirement
+    subprocess.run(["pip", "install", "flask", "flask-cors", "faiss-cpu", "ffmpeg-python", "praat-parselmouth", "pyworld", "numpy==1.26.4"], check=True)
+    
+    # Install infer_rvc_python in bypass mode
+    print("Memasang infer_rvc_python (bypass mode)...")
+    subprocess.run(["pip", "install", "infer_rvc_python", "--no-deps"], check=True)
     
 def setup_cloudflared():
     print("[2/3] Menyiapkan Cloudflare Tunnel...")
